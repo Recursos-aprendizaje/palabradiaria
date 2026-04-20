@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo oscuro premium -->
+  <rect width="512" height="512" fill="#0b0f19" rx="112"/>
+  <!-- Borde interior dorado sutil -->
+  <rect x="40" y="40" width="432" height="432" rx="80" fill="none" stroke="#d4af37" stroke-width="8" opacity="0.6"/>
+  <!-- Biblia Minimalista Verde Neón -->
+  <path d="M256 384c-50-40-110-40-150-40V144c40 0 100 0 150 40 50-40 110-40 150-40v200c-40 0-100 0-150 40z" fill="none" stroke="#00f2ac" stroke-width="24" stroke-linejoin="round"/>
+  <!-- Línea central de la Biblia -->
+  <line x1="256" y1="184" x2="256" y2="384" stroke="#00f2ac" stroke-width="24" stroke-linecap="round"/>
+  <!-- Cruz dorada -->
+  <line x1="256" y1="100" x2="256" y2="184" stroke="#d4af37" stroke-width="24" stroke-linecap="round"/>
+  <line x1="220" y1="140" x2="292" y2="140" stroke="#d4af37" stroke-width="24" stroke-linecap="round"/>
+</svg>
