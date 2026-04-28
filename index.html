@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Generador de Palabra Diaria</title>
-    <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b0f19">
-<link rel="icon" href="icono.svg" type="image/svg+xml">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Montserrat:wght@400;600;700;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -57,13 +54,32 @@
             border-radius: 8px; 
             margin-bottom: 20px; 
             outline: none; 
-            appearance: none; /* Oculta la flecha por defecto */
+            appearance: none; 
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 1rem center;
             background-size: 1em;
             cursor: pointer;
         }
+
+        /* BOTÓN DE IMAGEN PERSONALIZADA */
+        .custom-upload-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 16px;
+            background-color: rgba(0, 242, 172, 0.05);
+            border: 2px dashed var(--btn-cyan);
+            color: var(--btn-cyan);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .custom-upload-btn:active { background-color: rgba(0, 242, 172, 0.2); }
 
         .settings-card { border-top: 1px solid var(--border); padding-top: 20px; margin-bottom: 30px; }
         .slider-wrap { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -113,18 +129,29 @@
     </select>
 
     <!-- SELECTOR DE TEMÁTICA -->
-    <div class="section-title">TEMÁTICA</div>
+    <div class="section-title">TEMÁTICA DE FONDO</div>
     <select id="themeSelect" onchange="setTheme(this.value)">
         <option value="motores">🏎️ Motores</option>
         <option value="naturaleza">🌿 Naturaleza</option>
         <option value="ciudad">🌆 Ciudad</option>
+        <option value="personalizada">🖼️ Imagen Personalizada</option> <!-- NUEVA OPCIÓN -->
     </select>
 
-    <!-- SELECTOR DE IMÁGENES -->
-    <div class="section-title">SELECCIONAR IMAGEN</div>
+    <!-- SELECTOR DE IMÁGENES / CARGA -->
+    <div class="section-title" id="imgTitle">SELECCIONAR IMAGEN</div>
+    
+    <!-- Este select se muestra para categorías predefinidas -->
     <select id="imgSelect" onchange="selectImageFromDropdown(this.value)">
         <!-- Se llena dinámicamente -->
     </select>
+
+    <!-- Este botón se muestra SOLO cuando eligen "Imagen Personalizada" -->
+    <div id="customImgWrap" style="display: none;">
+        <label for="customInput" class="custom-upload-btn">
+            + SUBIR FOTO DESDE GALERÍA
+        </label>
+        <input type="file" id="customInput" accept="image/*" style="display: none;" onchange="loadCustomImage(event)">
+    </div>
 
     <div class="settings-card">
         <div class="section-title">AJUSTES VISUALES</div>
@@ -158,7 +185,7 @@
 </div>
 
 <script>
-    // BASE DE DATOS DE IMÁGENES
+    // BASE DE DATOS DE IMÁGENES PREDEFINIDAS
     const imgDB = {
         motores:[
             { name: 'Mercedes AMG', url: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80' },
@@ -186,7 +213,7 @@
         ]
     };
 
-    // BASE DE DATOS DE VERSÍCULOS COMPLETA Y SEGURA
+    // BASE DE DATOS DE VERSÍCULOS COMPLETA
     const verseDB = {
         paz: {
             RVR1960:[
@@ -360,11 +387,44 @@
 
     function setTheme(t) {
         state.theme = t;
-        renderImageOptions();
+        const imgSelect = document.getElementById('imgSelect');
+        const customImgWrap = document.getElementById('customImgWrap');
+        const imgTitle = document.getElementById('imgTitle');
+
+        if (t === 'personalizada') {
+            // Ocultar selectores normales y mostrar subida de imagen
+            imgSelect.style.display = 'none';
+            customImgWrap.style.display = 'block';
+            imgTitle.innerText = 'CARGA TU IMAGEN';
+            
+            // Poner el fondo oscuro temporalmente hasta que suba la foto
+            document.getElementById('verse-card').style.backgroundImage = 'none';
+        } else {
+            // Mostrar selectores normales
+            imgSelect.style.display = 'block';
+            customImgWrap.style.display = 'none';
+            imgTitle.innerText = 'SELECCIONAR IMAGEN';
+            renderImageOptions();
+        }
     }
 
-    // CARGAR SELECTOR DE IMÁGENES
+    // CARGA DE FOTO DESDE EL CELULAR
+    function loadCustomImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Aplica la foto del usuario como fondo del versículo
+                document.getElementById('verse-card').style.backgroundImage = `url('${e.target.result}')`;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // CARGAR SELECTOR DE IMÁGENES PREDEFINIDAS
     function renderImageOptions() {
+        if(state.theme === 'personalizada') return;
+
         const imgSelect = document.getElementById('imgSelect');
         imgSelect.innerHTML = ''; 
         
@@ -375,12 +435,12 @@
             imgSelect.appendChild(opt);
         });
         
-        // Seleccionar la primera imagen de la lista por defecto
         selectImageFromDropdown(0);
     }
 
     // CAMBIAR IMAGEN DE FONDO
     function selectImageFromDropdown(idx) {
+        if(state.theme === 'personalizada') return;
         const imgUrl = imgDB[state.theme][idx].url;
         document.getElementById('verse-card').style.backgroundImage = `url('${imgUrl}')`;
     }
